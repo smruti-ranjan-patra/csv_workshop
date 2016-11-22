@@ -6,12 +6,13 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$file = fopen("sheet.csv","r");
-$raw_data = array_map('str_getcsv', file('sheet.csv'));
-fclose($file);
+$file = fopen("sheet.csv","r"); //Open csv file
+$raw_data = array_map('str_getcsv', file('sheet.csv')); //Parse the csv file into an array
+fclose($file); //close the file
 
 $employee_num = count($raw_data);
 
+// Credentials for server and database
 $servername = "localhost";
 $username = "root";
 $password = "mindfire";
@@ -21,17 +22,18 @@ $dbname = "csv_workshop";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
-if ($conn->connect_error) {
+if ($conn->connect_error)
+{
     die("Connection failed: " . $conn->connect_error);
 }
 
 // Make the skills to lower case
 for($i=1; $i<$employee_num; $i++)
 {
-	for($j=3; $j<=7; $j++)
-	{
-		$raw_data[$i][$j] = strtolower($raw_data[$i][$j]);
-	}
+    for($j=3; $j<=7; $j++)
+    {
+        $raw_data[$i][$j] = strtolower($raw_data[$i][$j]);
+    }
 }
 
 skills($raw_data, $employee_num, $conn);
@@ -50,35 +52,35 @@ stackoverflow($raw_data, $employee_num, $conn);
 */
 function skills($raw_data, $employee_num, $conn)
 {
-	$skills = array();
+    $skills = array();
 
-	for($i=1; $i<$employee_num; $i++)
-	{
-		for($j=3; $j<=7; $j++)
-		{
-			$skills[] = mysqli_real_escape_string($conn, $raw_data[$i][$j]);
-		}
-	}
+    for($i=1; $i<$employee_num; $i++)
+    {
+        for($j=3; $j<=7; $j++)
+        {
+            $skills[] = mysqli_real_escape_string($conn, $raw_data[$i][$j]);
+        }
+    }
 
-	$skills = array_filter(array_unique($skills));
-	$query = "INSERT INTO skills (name)
-				VALUES ";
+    $skills = array_filter(array_unique($skills));
+    $query = "INSERT INTO skills (name)
+                VALUES ";
 
-	foreach($skills as $skill)
-	{
-		$query .= "('" . $skill . "'),";
-	}
+    foreach($skills as $skill)
+    {
+        $query .= "('" . $skill . "'),";
+    }
 
-	$query = rtrim($query, ",");
+    $query = rtrim($query, ",");
 
-	if ($conn->query($query) === TRUE)
-	{
-	    echo "\nNew record inserted into skills table successfully";
-	}
-	else
-	{
-	    echo "\nError: in skills table " . $query . "<br>" . $conn->error;
-	}
+    if (TRUE === $conn->query($query))
+    {
+        echo "\nNew record inserted into skills table successfully";
+    }
+    else
+    {
+        echo "\nError: in skills table " . $query . "<br>" . $conn->error;
+    }
 }
 
 /**
@@ -91,33 +93,33 @@ function skills($raw_data, $employee_num, $conn)
 */
 function hr($raw_data, $employee_num, $conn)
 {
-	$hr_list = array();
+    $hr_list = array();
 
-	for($i=1; $i<$employee_num; $i++)
-	{
-		$hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][10]);
-		$hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][11]);
-	}
+    for($i=1; $i<$employee_num; $i++)
+    {
+        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][10]);
+        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][11]);
+    }
 
-	$hr_list = array_filter(array_unique($hr_list));
-	$query = "INSERT INTO hr (name)
-				VALUES ";
+    $hr_list = array_filter(array_unique($hr_list));
+    $query = "INSERT INTO hr (name)
+                VALUES ";
 
-	foreach($hr_list as $hr)
-	{
-		$query .= "('" . $hr . "'),";
-	}
+    foreach($hr_list as $hr)
+    {
+        $query .= "('" . $hr . "'),";
+    }
 
-	$query = rtrim($query, ",");
+    $query = rtrim($query, ",");
 
-	if ($conn->query($query) === TRUE)
-	{
-	    echo "\nNew record inserted into hr table successfully";
-	}
-	else
-	{
-	    echo "\nError: in hr table " . $query . "<br>" . $conn->error;
-	}
+    if (TRUE === $conn->query($query))
+    {
+        echo "\nNew record inserted into hr table successfully";
+    }
+    else
+    {
+        echo "\nError: in hr table " . $query . "<br>" . $conn->error;
+    }
 }
 
 /**
@@ -130,29 +132,29 @@ function hr($raw_data, $employee_num, $conn)
 */
 function employees($raw_data, $employee_num, $conn)
 {
-	$query = "INSERT INTO employees (employee_id, first_name, last_name, created_by, updated_by)
-				VALUES";
+    $query = "INSERT INTO employees (employee_id, first_name, last_name, created_by, updated_by)
+                VALUES";
 
-	for($i=1; $i<$employee_num; $i++)
-	{
-		$employee_id = mysqli_real_escape_string($conn, $raw_data[$i][0]);
-		$first_name = mysqli_real_escape_string($conn, $raw_data[$i][1]);
-		$last_name = mysqli_real_escape_string($conn, $raw_data[$i][2]);
-		$created_by = fetchHrId($conn, $raw_data[$i][10]);
-		$updated_by = fetchHrId($conn, $raw_data[$i][11]);
-		$query .= "('{$employee_id}', '{$first_name}', '{$last_name}', $created_by, $updated_by),";
-	}
+    for($i=1; $i<$employee_num; $i++)
+    {
+        $employee_id = mysqli_real_escape_string($conn, $raw_data[$i][0]);
+        $first_name = mysqli_real_escape_string($conn, $raw_data[$i][1]);
+        $last_name = mysqli_real_escape_string($conn, $raw_data[$i][2]);
+        $created_by = fetchHrId($conn, $raw_data[$i][10]);
+        $updated_by = fetchHrId($conn, $raw_data[$i][11]);
+        $query .= "('{$employee_id}', '{$first_name}', '{$last_name}', $created_by, $updated_by),";
+    }
 
-	$query = rtrim($query, ",");
+    $query = rtrim($query, ",");
 
-	if ($conn->query($query) === TRUE)
-	{
-	    echo "\nNew record inserted into employees table";
-	}
-	else
-	{
-	    echo "\nError: in employees table " . $query . "<br>" . $conn->error;
-	}
+    if (TRUE === $conn->query($query))
+    {
+        echo "\nNew record inserted into employees table";
+    }
+    else
+    {
+        echo "\nError: in employees table " . $query . "<br>" . $conn->error;
+    }
 }
 
 /**
@@ -165,32 +167,32 @@ function employees($raw_data, $employee_num, $conn)
 */
 function employeeSkill($raw_data, $employee_num, $conn)
 {
-	$query = "INSERT INTO employee_skill (emp_id, skill_id)
-				VALUES";
+    $query = "INSERT INTO employee_skill (emp_id, skill_id)
+                VALUES";
 
-	for($i=1; $i<$employee_num; $i++)
-	{
-		for($j=3; $j<=7; $j++)
-		{
-			if($raw_data[$i][$j] != '')
-			{
-				$emp_id = fetchEmpId($conn, $raw_data[$i][0]);
-				$skill_id = fetchSkillId($conn, $raw_data[$i][$j]);
-				$query .= "($emp_id, $skill_id),";
-			}
-		}
-	}
+    for($i=1; $i<$employee_num; $i++)
+    {
+        for($j=3; $j<=7; $j++)
+        {
+            if($raw_data[$i][$j] != '')
+            {
+                $emp_id = fetchEmpId($conn, $raw_data[$i][0]);
+                $skill_id = fetchSkillId($conn, $raw_data[$i][$j]);
+                $query .= "($emp_id, $skill_id),";
+            }
+        }
+    }
 
-	$query = rtrim($query, ",");
+    $query = rtrim($query, ",");
 
-	if ($conn->query($query) === TRUE)
-	{
-	    echo "\nNew record inserted into employee_skill pivot table";
-	}
-	else
-	{
-	    echo "\nError: in employee_skill table " . $query . "<br>" . $conn->error;
-	}
+    if (TRUE === $conn->query($query))
+    {
+        echo "\nNew record inserted into employee_skill pivot table";
+    }
+    else
+    {
+        echo "\nError: in employee_skill table " . $query . "<br>" . $conn->error;
+    }
 }
 
 /**
@@ -203,27 +205,27 @@ function employeeSkill($raw_data, $employee_num, $conn)
 */
 function stackoverflow($raw_data, $employee_num, $conn)
 {
-	$query = "INSERT INTO stackoverflow (emp_id, stack_id, nick_name)
-				VALUES";
+    $query = "INSERT INTO stackoverflow (emp_id, stack_id, nick_name)
+                VALUES";
 
-	for($i=1; $i<$employee_num; $i++)
-	{
-		$emp_id = fetchEmpId($conn, $raw_data[$i][0]);
-		$stack_id = $raw_data[$i][8];
-		$nick_name = mysqli_real_escape_string($conn, $raw_data[$i][9]);
-		$query .= "({$emp_id}, {$stack_id}, '{$nick_name}'),";
-	}
+    for($i=1; $i<$employee_num; $i++)
+    {
+        $emp_id = fetchEmpId($conn, $raw_data[$i][0]);
+        $stack_id = $raw_data[$i][8];
+        $nick_name = mysqli_real_escape_string($conn, $raw_data[$i][9]);
+        $query .= "({$emp_id}, {$stack_id}, '{$nick_name}'),";
+    }
 
-	$query = rtrim($query, ",");
+    $query = rtrim($query, ",");
 
-	if ($conn->query($query) === TRUE)
-	{
-	    echo "\nNew record inserted into stackoverflow table";
-	}
-	else
-	{
-	    echo "\nError: in stackoverflow table " . $query . "<br>" . $conn->error;
-	}
+    if (TRUE === $conn->query($query))
+    {
+        echo "\nNew record inserted into stackoverflow table";
+    }
+    else
+    {
+        echo "\nError: in stackoverflow table " . $query . "<br>" . $conn->error;
+    }
 }
 
 /**
@@ -235,11 +237,11 @@ function stackoverflow($raw_data, $employee_num, $conn)
 */
 function fetchHrId($conn, $name)
 {
-	$select_query = "SELECT id 
-					FROM hr
-					WHERE name='" . $name . "'";
-	$result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
-	return $result['id'];
+    $select_query = "SELECT id 
+                    FROM hr
+                    WHERE name='" . $name . "'";
+    $result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
+    return $result['id'];
 }
 
 /**
@@ -251,11 +253,11 @@ function fetchHrId($conn, $name)
 */
 function fetchEmpId($conn, $employee_id)
 {
-	$select_query = "SELECT id 
-					FROM employees
-					WHERE employee_id='" . $employee_id . "'";
-	$result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
-	return $result['id'];
+    $select_query = "SELECT id 
+                    FROM employees
+                    WHERE employee_id='" . $employee_id . "'";
+    $result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
+    return $result['id'];
 }
 
 /**
@@ -267,11 +269,11 @@ function fetchEmpId($conn, $employee_id)
 */
 function fetchSkillId($conn, $skill)
 {
-	$select_query = "SELECT id 
-					FROM skills
-					WHERE name='" . $skill . "'";
-	$result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
-	return $result['id'];
+    $select_query = "SELECT id 
+                    FROM skills
+                    WHERE name='" . $skill . "'";
+    $result = mysqli_fetch_array($conn->query($select_query), MYSQLI_ASSOC);
+    return $result['id'];
 }
 
 $conn->close();

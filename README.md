@@ -1,2 +1,2 @@
 # csv_workshop
-Parse CSV file and display content like it
+Parse a given CSV file and display content like the format in the given CSV file.
