@@ -1,9 +1,17 @@
 <?php
 $start_time = microtime(true);
 
-$file = fopen("sheet.csv","r"); //Open csv file
-$raw_data = array_map('str_getcsv', file('sheet.csv')); //Parse the csv file into an array
-fclose($file); //close the file
+try
+{
+    $file = fopen("sheet.csv","r"); //Open csv file
+    $raw_data = array_map('str_getcsv', file('sheet.csv')); //Parse the csv file into an array
+    fclose($file); //close the file
+}
+catch(Exception $e)
+{
+    echo "An exception occured -> " . $e;
+    exit;
+}
 
 // Credentials for server and database
 $servername = "localhost";
@@ -20,7 +28,9 @@ if ($conn->connect_error)
     die("Connection failed: " . $conn->connect_error);
 }
 
-display($conn);
+$num_skills = substr_count(strtolower(implode($raw_data[0])), 'skill');
+display($conn, $num_skills);
+
 
 /**
  * Fetch the data from DB and display as CSV format
@@ -29,7 +39,7 @@ display($conn);
  * @param  object  $conn
  * @return void
 */
-function display($conn)
+function display($conn, $num_skills)
 {
     $display_array = array();
     $select_query = "SELECT e.employee_id, e.first_name, e.last_name, GROUP_CONCAT(s.name) AS skills, 
@@ -50,11 +60,13 @@ function display($conn)
         $display_array[$counter]['first_name'] = $row['first_name'];
         $display_array[$counter]['last_name'] = $row['last_name'];
         $skills_array = explode(",", $row['skills']);
-        $display_array[$counter]['skill1'] = isset($skills_array[0]) ? $skills_array[0] : '';
-        $display_array[$counter]['skill2'] = isset($skills_array[1]) ? $skills_array[1] : '';
-        $display_array[$counter]['skill3'] = isset($skills_array[2]) ? $skills_array[2] : '';
-        $display_array[$counter]['skill4'] = isset($skills_array[3]) ? $skills_array[3] : '';
-        $display_array[$counter]['skill5'] = isset($skills_array[4]) ? $skills_array[4] : '';
+
+        for($i=1; $i<=$num_skills; $i++)
+        {
+            $key = 'skill' . $i;
+            $display_array[$counter][$key] = isset($skills_array[$i-1]) ? $skills_array[$i-1] : '';
+        }
+
         $display_array[$counter]['stack_id'] = $row['stack_id'];
         $display_array[$counter]['stack_nickname'] = $row['nick_name'];
         $display_array[$counter]['created_by'] = $row['created_by'];
@@ -80,11 +92,12 @@ function display($conn)
                         <th>EmpID</th>
                         <th>Name</th>
                         <th>Last</th>
-                        <th>Skill1</th>
-                        <th>Skill2</th>
-                        <th>Skill3</th>
-                        <th>Skill4</th>
-                        <th>Skill5</th>
+                        <?php
+                            for($i=1; $i<=$num_skills; $i++)
+                            {
+                                echo "<th>Skill" . $i . "</th>";
+                            }
+                        ?>
                         <th>StackID</th>
                         <th>StackNickname</th>
                         <th>CreatedBy</th>

@@ -1,14 +1,20 @@
 <?php
 $start_time = microtime(true);
-echo "start time -> " . $start_time;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+try
+{
+    $file = fopen("sheet.csv","r"); //Open csv file
+    $raw_data = array_map('str_getcsv', file('sheet.csv')); //Parse the csv file into an array
+    fclose($file); //close the file
+}
+catch(Exception $e)
+{
+    echo "An exception occured -> " . $e;
+    exit;
+}
 
-$file = fopen("sheet.csv","r"); //Open csv file
-$raw_data = array_map('str_getcsv', file('sheet.csv')); //Parse the csv file into an array
-fclose($file); //close the file
+$num_skills = substr_count(strtolower(implode($raw_data[0])), 'skill');
+
 
 $employee_num = count($raw_data);
 
@@ -30,16 +36,16 @@ if ($conn->connect_error)
 // Make the skills to lower case
 for($i=1; $i<$employee_num; $i++)
 {
-    for($j=3; $j<=7; $j++)
+    for($j=3; $j<(3+$num_skills); $j++)
     {
         $raw_data[$i][$j] = strtolower($raw_data[$i][$j]);
     }
 }
 
-skills($raw_data, $employee_num, $conn);
+skills($raw_data, $employee_num, $conn, $num_skills);
 hr($raw_data, $employee_num, $conn);
 employees($raw_data, $employee_num, $conn);
-employeeSkill($raw_data, $employee_num, $conn);
+employeeSkill($raw_data, $employee_num, $conn, $num_skills);
 stackoverflow($raw_data, $employee_num, $conn);
 
 /**
@@ -50,13 +56,13 @@ stackoverflow($raw_data, $employee_num, $conn);
  * @param  object  $conn
  * @return void
 */
-function skills($raw_data, $employee_num, $conn)
+function skills($raw_data, $employee_num, $conn, $num_skills)
 {
     $skills = array();
 
     for($i=1; $i<$employee_num; $i++)
     {
-        for($j=3; $j<=7; $j++)
+        for($j=3; $j<(3+$num_skills); $j++)
         {
             $skills[] = mysqli_real_escape_string($conn, $raw_data[$i][$j]);
         }
@@ -165,14 +171,14 @@ function employees($raw_data, $employee_num, $conn)
  * @param  object  $conn
  * @return void
 */
-function employeeSkill($raw_data, $employee_num, $conn)
+function employeeSkill($raw_data, $employee_num, $conn, $num_skills)
 {
     $query = "INSERT INTO employee_skill (emp_id, skill_id)
                 VALUES";
 
     for($i=1; $i<$employee_num; $i++)
     {
-        for($j=3; $j<=7; $j++)
+        for($j=3; $j<3+$num_skills; $j++)
         {
             if($raw_data[$i][$j] != '')
             {
