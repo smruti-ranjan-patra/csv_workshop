@@ -43,8 +43,8 @@ for($i=1; $i<$employee_num; $i++)
 }
 
 skills($raw_data, $employee_num, $conn, $num_skills);
-hr($raw_data, $employee_num, $conn);
-employees($raw_data, $employee_num, $conn);
+hr($raw_data, $employee_num, $conn, $num_skills);
+employees($raw_data, $employee_num, $conn, $num_skills);
 employeeSkill($raw_data, $employee_num, $conn, $num_skills);
 stackoverflow($raw_data, $employee_num, $conn);
 
@@ -97,14 +97,14 @@ function skills($raw_data, $employee_num, $conn, $num_skills)
  * @param  object  $conn
  * @return void
 */
-function hr($raw_data, $employee_num, $conn)
+function hr($raw_data, $employee_num, $conn, $num_skills)
 {
     $hr_list = array();
 
     for($i=1; $i<$employee_num; $i++)
     {
-        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][10]);
-        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][11]);
+        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][5+$num_skills]);
+        $hr_list[] = mysqli_real_escape_string($conn, $raw_data[$i][6+$num_skills]);
     }
 
     $hr_list = array_filter(array_unique($hr_list));
@@ -136,7 +136,7 @@ function hr($raw_data, $employee_num, $conn)
  * @param  object  $conn
  * @return void
 */
-function employees($raw_data, $employee_num, $conn)
+function employees($raw_data, $employee_num, $conn, $num_skills)
 {
     $query = "INSERT INTO employees (employee_id, first_name, last_name, created_by, updated_by)
                 VALUES";
@@ -146,8 +146,8 @@ function employees($raw_data, $employee_num, $conn)
         $employee_id = mysqli_real_escape_string($conn, $raw_data[$i][0]);
         $first_name = mysqli_real_escape_string($conn, $raw_data[$i][1]);
         $last_name = mysqli_real_escape_string($conn, $raw_data[$i][2]);
-        $created_by = fetchHrId($conn, $raw_data[$i][10]);
-        $updated_by = fetchHrId($conn, $raw_data[$i][11]);
+        $created_by = fetchHrId($conn, $raw_data[$i][5+$num_skills]);
+        $updated_by = fetchHrId($conn, $raw_data[$i][6+$num_skills]);
         $query .= "('{$employee_id}', '{$first_name}', '{$last_name}', $created_by, $updated_by),";
     }
 

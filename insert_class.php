@@ -130,9 +130,10 @@ class InsertCSV
 
         for($i=1; $i<$this->employee_num; $i++)
         {
-            $hr_name = isset($this->raw_data[$i][10]) ? strtoupper($this->raw_data[$i][10]) : '';
+            $hr_name = isset($this->raw_data[$i][5+$this->num_skills]) ? strtoupper($this->raw_data[$i][5+$this->num_skills]) : '';
             $hr_list[] = mysqli_real_escape_string($this->conn, $hr_name);
-            $hr_name = isset($this->raw_data[$i][11]) ? strtoupper($this->raw_data[$i][11]) : '';
+
+            $hr_name = isset($this->raw_data[$i][6+$this->num_skills]) ? strtoupper($this->raw_data[$i][6+$this->num_skills]) : '';
             $hr_list[] = mysqli_real_escape_string($this->conn, $hr_name);
         }
 
@@ -167,8 +168,8 @@ class InsertCSV
             $employee_id = mysqli_real_escape_string($this->conn, $this->raw_data[$i][0]);
             $first_name = mysqli_real_escape_string($this->conn, $this->raw_data[$i][1]);
             $last_name = mysqli_real_escape_string($this->conn, $this->raw_data[$i][2]);
-            $created_by = $this->fetchHrId($this->conn, $this->raw_data[$i][10]);
-            $updated_by = $this->fetchHrId($this->conn, $this->raw_data[$i][11]);
+            $created_by = $this->fetchHrId($this->conn, $this->raw_data[$i][5+$this->num_skills]);
+            $updated_by = $this->fetchHrId($this->conn, $this->raw_data[$i][6+$this->num_skills]);
             $query .= "('{$employee_id}', '{$first_name}', '{$last_name}', $created_by, $updated_by),";
         }
 
@@ -222,8 +223,8 @@ class InsertCSV
         for($i=1; $i<$this->employee_num; $i++)
         {
             $emp_id = $this->fetchEmpId($this->conn, $this->raw_data[$i][0]);
-            $stack_id = $this->raw_data[$i][8];
-            $nick_name = mysqli_real_escape_string($this->conn, $this->raw_data[$i][9]);
+            $stack_id = $this->raw_data[$i][3+$this->num_skills];
+            $nick_name = mysqli_real_escape_string($this->conn, $this->raw_data[$i][4+$this->num_skills]);
             $query .= "({$emp_id}, '{$stack_id}', '{$nick_name}'),";
         }
 
