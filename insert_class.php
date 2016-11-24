@@ -1,8 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
+echo "start time -> " . microtime(true);
 require_once('config.php');
 
 class InsertCSV
@@ -300,4 +298,5 @@ else
 }
 
 mysqli_close($insert_obj->conn);
+echo "<br>end time -> " . microtime(true);
 ?>
