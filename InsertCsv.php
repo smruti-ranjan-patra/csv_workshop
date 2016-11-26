@@ -3,7 +3,7 @@
 echo "start time -> " . microtime(true);
 require_once('config.php');
 
-class InsertCSV
+class InsertCsv
 {
     public $conn = NULL;
     private $raw_data = array();
@@ -279,7 +279,7 @@ class InsertCSV
     }
 }
 
-$insert_obj = new InsertCSV($db_credentials);
+$insert_obj = new InsertCsv($db_credentials);
 $insert_obj->parseCsv();
 mysqli_autocommit($insert_obj->conn, FALSE);
 $insert_obj->skills();

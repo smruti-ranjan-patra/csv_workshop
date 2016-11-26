@@ -2,7 +2,7 @@
 
 require_once('config.php');
 
-class DisplayCSV
+class DisplayCsv
 {
     public $conn = NULL;
     private $raw_data = array();
@@ -101,7 +101,7 @@ class DisplayCSV
     }
 }
 
-$display_obj = new DisplayCSV($db_credentials);
+$display_obj = new DisplayCsv($db_credentials);
 $display_obj->parseCsv();
 $display_obj->fetchData();
 mysqli_close($display_obj->conn);
